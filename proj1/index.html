@@ -1,7 +1,127 @@
 <html>
-	<head>
+	<head><h1 style="text-align:center;">Project 1 Write-Up</h1>
 	</head>
+    
+    <!--An overview of the project, your approach to and implementation for each of the parts, and what problems you encountered and how you solved them. Strive for clarity and succinctness.-->
 	<body>
-		Project 1 here
+        <h2 style="text-align:center;">overview </h2>
+        <p style="text-align:center;">
+            In this project, we implemented a simple rasterizer, 
+            including features like drawing triangles, supersampling, hierarchical transforms, 
+            and texture mapping with antialiasing. We learned all about the magic of linear interpolation and its ability to preserve details when rasterizing images!
+            </p>
+          <h2 style="text-align:center;">Task 1: </h2>
+          <p style="text-align:center;">We were able to rasterize triangles by calculating the differences between all of the adjacent points on each triangle and performing the three line test to check whether or not a pixel in the image was indeed inside a triangle. 
+            If it was inside the triangle, or even on the edge, then we filled in the pixel with the fill_pixel function.
+          
+              Our algorithm is no worse than one that checks each sample within the bounding box of the triangle because we iterated through each pixel one at a time!
+          </p>
+          
+          <p style="text-align:center;">
+          <br>
+          <br>
+          <img src="Task1-img4.png" width="650" height="300" alt="Task 1 Test 4">
+          </p>
+          
+          <h2 style="text-align:center;">Task 2: </h2>
+          <p style="text-align:center;">
+            Similar to Task 1, we first iterated pixel by pixel. We sampled evenly distrubited points (as determined by variable sample_rate) in the pixel and appended its color to sample_buffer array. 
+            To populate frame_buffer array, we took the average of the colors of its sampled points for each pixel. 
+            To ensure pixels that make up points and lines are not affected by supersampling, we modified fill_pixel to populate all its corresponding sample points with the same color.
+            Supersampling is an anti-alising method that helps to prevent "jaggies" - jagged lines at color boundaries. It softens the edges of triangles by giving those pixels a lighter shade.
+            </p>
+            <div style="text-align:center;">
+                <img src="task2-1.png" width="650" height="300" alt="Task 2 1">
+                <p style="text-align:center;"> ^ The edges of the triangles look like staircases because we only sampled the center of each pixel, hence pixels that only contain part of the edges may not have filled, leading to jaggies! </p>
+            </div>
+            <div style="text-align:center;">
+                <img src="task2-4.png" width="650" height="300" alt="Task 2 4">
+                <p style="text-align:center;"> ^ The edges of the triangles look like smoother because we sampled 4 times every pixel and took the average of the colors, hence pixels that only contain part of the edges has a lighter shade! </p>
+            </div>
+            <div style="text-align:center;">
+                <img src="task2-16.png" width="650" height="300" alt="Task 2 16">
+                <p style="text-align:center;"> ^ The edges of the triangles look like the smooithest! because we sampled 16 times every pixel and took the average of the colors, hence pixels that only contain part of the edges has a lighter shade! </p>
+            </div>            
+          <h2 style="text-align:center;">Task 3: </h2>
+          <p style="text-align:center;">
+          We did not encounter any problems other than figuring out which syntax to use for these functions.
+          <br>
+          Cubeman is now a cool robot with a flashy hairstyle. He is running away from all adoring fans.
+          <br>
+          <br>
+          <img src="my_robot.png" width="450" height="650" alt="Robot running">
+          </p>
+          
+          <h2 style="text-align:center;">Task 4: </h2>
+          <p style="text-align:center;">Barycentric coordinates are useful for interpolation across triangles. Interpolation is useful for specifying values, in our case color, at vertices and obtaining varying values across the surface. In this image, we have a single triangle with three vertices: one blue, green, and red. These vertices ultimately produce a smoothly blended color triangle.
+          
+              Problems we encountered consisted of figuring out which color to use to fill in each desired pixel. Turns out, we had to use the sum of all the three colors c0, c1, c2 with the intensity being weighted by alpha, beta, and gamma.
+          
+          <br>
+          <br>
+          <img src="task4-aid.png" width="450" height="300" alt="Barycentric Coordinates aid">
+                 
+        
+          <img src="task4-test7.png" width="450" height="300" alt="Task 4 Test 7">
+          </p>
+              
+              <br>
+              <br>
+          <h2 style="text-align:center;">Task 5: </h2>
+          <p style="text-align:center;">
+            Pixel Sampling is a process where we evalulate a pixel, in this case, we are trying to map a texture onto a surface.
+            We first computed the barycentric coordinates of each sampled point, we then calculated the uv vector using the barycentric coordinates as the weighted sum of the vertices.
+            Then we scaled u by width of the texture - 1 and v by height of the texture -1. (we had to minus 1 to account for zero indexing). This gives us the texture coordinate corresponding to the sampled point.
+           
+            For nearest pixel sampling, We rounded the texture coorindate to a whole number, such that it maps to 1 pixel. We then assigned the color of that pixel to the sample point.
+
+            For bilinear sampling, we found the 4 pixels that surrounded the texture coordinate. We then did linear interpolation twice on the colors of those pixels to figure out the exact color of the sample point.
+
+            The color of the sample point was appened to sample buffer, and processed similiarly to Task 2.
+            <div style="text-align:center;">
+                <img src="task5-bilinear-1.png" width="650" height="300" alt="Task 5 1">
+                <img src="task5-nearest-1.png" width="650" height="300" alt="Task 5 11">
+            </div>  
+            <div style="text-align:center;">
+                <img src="task5-bilinear-16.png" width="650" height="300" alt="Task 5 16">
+                <img src="task5-nearest-16.png" width="650" height="300" alt="Task 5 16">
+            </div>  
+            <p style="text-align:center;">TL: bilinear with 1 sample / pixel, TR: nearest with 1 sample / pixel </p>
+            <p style="text-align:center;">BL: bilinear with 16 samples / pixel, BR: nearest with 16 samples / pixel </p>
+            <p style="text-align:center;"> 
+                The difference between bilinear sampling and nearest sampling with 1 sample per pixel is huge! 
+                The effect is especially obivious at maginifed areas where pixels have already been dropped due to warping. 
+                Nearest sampling further exacerbates this problem yielding discontinuties in lines. 
+                The difference is less obvious when we have more sampels per pixel. Supersampling already does a pertty good job at 
+                picking up details, hence the bilinear interpolation wasn't very useful.
+            </p>
+
+
+        </p>
+          <h2 style="text-align:center;">Task 6: </h2>
+          <p style="text-align:center;">
+            To carry out level sampling, we calculated the barycentric coordinates of (x+1,y) and (x,y+1) 
+            and passed their corresponding texel coordinate into the sample method where we computed du/dx, dv/dv/ du/dv and dv/dy. 
+            Using the equation on the lecture slide, we calculated D. For nearest sampling, 
+            we simply rounded D off and scaled uv according to the size of D to figure out the textual coordinates.
+            For linear sampling, we found the textual coordinates corresponding to ceil(D) and floor(D) and carried out linear interpolation.
+            Bilinear sampling for both levels and pixels increase memory usuage and reduce speed due to extra computation requited for linear interpolation. However, it helps
+            with anti-alising due to its averaging effect. Supersampling also takes up more memory and space, however, we can code supersamplign to not take up as much space but not storing all the sampled point. However this may 
+            decrease speed due to our inability to parrallelise our program.
+        </p>
+
+        <div style="text-align:center;">
+            <img src="task6-nl-np.png" width="650" height="300" alt="Task 5 1">
+            <img src="task6-nl-bp.png" width="650" height="300" alt="Task 5 11">
+        </div>  
+        <div style="text-align:center;">
+            <img src="task6-bl-np.png" width="650" height="300" alt="Task 5 16">
+            <img src="task6-bl-bp.png" width="650" height="300" alt="Task 5 16">
+        </div>  
+        <p style="text-align:center;">TL: nearest level +  nearest pixel, TR: nearest level +  bilinear pixel </p>
+        <p style="text-align:center;">BL: bilinear level +  nearest pixel, BR: bilinear level +  bilinear pixel </p>
+        
+    
+        
 	</body>
 </html>
